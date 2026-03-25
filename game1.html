@@ -1,4 +1,8 @@
-
+<!DOCTYPE html>
+<html lang="th">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level 1</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&display=swap');
   .game-wrap{font-family:'Share Tech Mono',monospace;background:#1a1208;border:2px solid #8B6914;border-radius:8px;padding:20px;max-width:600px;margin:0 auto;box-shadow:inset 0 0 40px rgba(0,0,0,0.6);position:relative;}
@@ -58,12 +62,8 @@
   </div>
   <div class="title-bar">
     <span class="gear-icon">⚙</span>
-    <h1>Ironhaven Factory</h1>
+    <h1>Ironhaven Factory - Level 1</h1>
     <span class="gear-icon" style="animation-direction:reverse;font-size:14px;">⚙</span>
-  </div>
-  <div class="status-bar" id="statusBar">
-    <span class="blink">►</span>
-    <span id="statusText">Unit R-7 online. Navigate to the key.</span>
   </div>
   <div style="display:flex;justify-content:center;">
     <div class="grid-container" id="grid"></div>
@@ -77,10 +77,10 @@
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M4 9h6v3H4z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Pick Up
     </button>
     <button class="btn" onclick="doTurn(-1)">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7C3 4.8 4.8 3 7 3h2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 1L9 3L6 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>Turn Left
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7C11 4.8 9.2 3 7 3H5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 1L5 3L8 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>Turn Left
     </button>
     <button class="btn" onclick="doTurn(1)">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7C11 4.8 9.2 3 7 3H5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 1L5 3L8 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>Turn Right
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7C3 4.8 4.8 3 7 3h2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 1L9 3L6 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>Turn Right
     </button>
   </div>
   <div class="divider"></div>
@@ -115,7 +115,6 @@ function initState(){
   visited[robot.r][robot.c]=true;
 }
 function revealAll(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)visited[r][c]=true;}
-function setStatus(msg){document.getElementById('statusText').textContent=msg;}
 function wallHTML(){let b='';for(let i=0;i<9;i++)b+='<div class="wall-brick"></div>';return`<div class="wall-inner">${b}</div>`;}
 function keySVG(){return`<div class="key-glow"></div><svg class="key-svg" width="34" height="34" viewBox="0 0 40 40"><circle cx="16" cy="16" r="9" fill="none" stroke="#d4920a" stroke-width="2.5"/><circle cx="16" cy="16" r="5" fill="none" stroke="#d4920a" stroke-width="1.5"/><line x1="22" y1="22" x2="34" y2="34" stroke="#d4920a" stroke-width="2.5" stroke-linecap="round"/><rect x="28" y="29" width="5" height="3" rx="1" fill="#d4920a"/><rect x="30" y="32" width="3" height="4" rx="1" fill="#d4920a"/><circle cx="16" cy="16" r="2" fill="#ffb800"/></svg>`;}
 
@@ -227,7 +226,6 @@ function triggerExplode(reason){
   const g=document.getElementById('grid');
   g.classList.add('shaking');
   setTimeout(()=>g.classList.remove('shaking'),400);
-  setTimeout(()=>{revealAll();renderGrid(true);},500);
   setTimeout(()=>{
     const o=document.getElementById('endOverlay');
     document.getElementById('endTitle').textContent='UNIT DESTROYED';
@@ -255,27 +253,23 @@ function doMove(){
   const d=DIRS[robot.dir];
   const nr=robot.r+d.dr, nc=robot.c+d.dc;
   if(nr<0||nr>=ROWS||nc<0||nc>=COLS){
-    setStatus('⚠ FELL OFF THE EDGE — Unit lost!');
     triggerExplode('Fell off the edge. Reinitialise?');
     return;
   }
   if(map[nr][nc]===_W){
     robot.r=nr;robot.c=nc;
-    setStatus('⚠ COLLISION — Hull breach!');
     triggerExplode('Wall collision. Reinitialise?');
     return;
   }
   robot.r=nr;robot.c=nc;
   visited[nr][nc]=true;
   const onKey=robot.r===KEY_POS.r&&robot.c===KEY_POS.c;
-  setStatus(onKey?'[ KEY DETECTED ] Press PICK UP!':`Moving ${DIRS[robot.dir].label} → (${nr},${nc})`);
   renderGrid(false);
 }
 
 function doTurn(delta){
   if(gameOver)return;
   robot.dir=(robot.dir+delta+4)%4;
-  setStatus(`Rotating... facing ${DIRS[robot.dir].label}.`);
   renderGrid(false);
 }
 
@@ -283,17 +277,13 @@ function doPickup(){
   if(gameOver)return;
   if(robot.r===KEY_POS.r&&robot.c===KEY_POS.c){
     map[KEY_POS.r][KEY_POS.c]=_G;
-    setStatus('KEY SECURED!');
     triggerWin();
-  } else {
-    setStatus('Nothing to pick up here.');
   }
 }
 
 function restartGame(){
   initState();
   document.getElementById('endOverlay').style.display='none';
-  setStatus('Unit R-7 online. Navigate to the key.');
   renderGrid(false);
 }
 
@@ -307,3 +297,4 @@ document.addEventListener('keydown',(e)=>{
 initState();
 renderGrid(false);
 </script>
+</html>

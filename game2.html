@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BOMB DEFUSER — STEAMPUNK</title>
+<title>Level 2</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Special+Elite&display=swap');
 
@@ -517,10 +517,10 @@ body::before {
   <div class="header-panel">
     <div class="title-row">
       <span class="gear-icon">⚙</span>
-      <span class="header-title">EXPLOSIVE ORDNANCE UNIT</span>
+      <span class="header-title">DEFUSE THE BOMB!</span>
       <span class="gear-icon rev">⚙</span>
     </div>
-    <div class="header-sub">— DEFUSAL APPARATUS Mk. IV —</div>
+    <div class="header-sub">Click to cut the wire!</div>
   </div>
 
   <!-- PRESSURE GAUGES -->
@@ -537,7 +537,7 @@ body::before {
 
   <!-- BOTTOM PANEL -->
   <div class="bottom-panel">
-    <div class="message" id="message">ตัดสายเพื่อกู้ระเบิด</div>
+    <div class="message" id="message">Cut the correct wire!</div>
     <button class="reset-btn" id="resetBtn" onclick="resetGame()">NEXT ROUND</button>
   </div>
 
@@ -701,7 +701,7 @@ function resetGame() {
   gameOver = false;
   activeBombs = pickRandom2();
   state = activeBombs.map(() => ({ defused: false, exploded: false }));
-  document.getElementById('message').textContent = 'ตัดสายเพื่อกู้ระเบิด';
+  document.getElementById('message').textContent = 'Cut the correct wire!';
   document.getElementById('message').className = 'message';
   document.getElementById('resetBtn').classList.remove('show');
   buildBombs();
