@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOMB DEFUSER — STEAMPUNK</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Special+Elite&display=swap');
+
+:root {
+  --bg:        #1a1108;
+  --bg2:       #231a0d;
+  --copper:    #b5651d;
+  --copper-lt: #d4843a;
+  --copper-dk: #7a3f0e;
+  --brass:     #c8a84b;
+  --brass-lt:  #e8c96a;
+  --brass-dk:  #8a6a1e;
+  --rust:      #8b3a10;
+  --steam:     rgba(220,210,190,0.15);
+  --pipe:      #5c3d1e;
+  --pipe-lt:   #7a5530;
+  --rivet:     #9b7a3a;
+  --text:      #d4b483;
+  --text-dim:  #7a5c30;
+  --red:       #cc2200;
+  --blue:      #2255cc;
+  --yellow:    #ddaa00;
+  --green:     #33cc66;
+  --bomb-bg:   #0a0805;
+  --bomb-border: #2a1f0f;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Special Elite', cursive;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── BACKGROUND TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(90,50,10,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(90,50,10,0.2) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── PIPES DECORATION (background SVG) ── */
+.pipes-bg {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 1;
+  overflow: hidden;
+}
+
+/* ── STEAM PARTICLES ── */
+.steam-emitter {
+  position: fixed;
+  pointer-events: none; z-index: 2;
+}
+.steam-puff {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(220,210,190,0.5) 0%, transparent 70%);
+  animation: steamUp 3s ease-out forwards;
+}
+@keyframes steamUp {
+  0%   { transform: translateY(0) scale(0.4); opacity: 0.7; }
+  40%  { opacity: 0.4; }
+  100% { transform: translateY(-120px) translateX(var(--dx, 10px)) scale(2.8); opacity: 0; }
+}
+
+/* ── MAIN CONTENT ── */
+.content {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 28px;
+  width: 100%; max-width: 700px;
+}
+
+/* ── HEADER PANEL ── */
+.header-panel {
+  width: 100%;
+  background: var(--bg2);
+  border: 2px solid var(--copper-dk);
+  border-radius: 4px;
+  padding: 16px 24px;
+  position: relative;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.6);
+}
+/* corner rivets */
+.header-panel::before,
+.header-panel::after {
+  content: '';
+  position: absolute;
+  width: 10px; height: 10px;
+  background: radial-gradient(circle at 35% 35%, var(--brass-lt), var(--brass-dk));
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.header-panel::before { top: 8px; left: 8px; }
+.header-panel::after  { top: 8px; right: 8px; }
+
+.title-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px;
+}
+.gear-icon {
+  font-size: 20px; color: var(--brass);
+  animation: spinGear 8s linear infinite;
+  display: inline-block;
+}
+.gear-icon.rev { animation-direction: reverse; animation-duration: 6s; }
+@keyframes spinGear { to { transform: rotate(360deg); } }
+
+.header-title {
+  font-family: 'Cinzel', serif;
+  font-size: 22px; font-weight: 700;
+  color: var(--brass-lt);
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 12px rgba(200,168,75,0.4);
+}
+.header-sub {
+  text-align: center;
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: 0.2em;
+  margin-top: 6px;
+}
+
+/* ── PIPES TOP DECORATION ── */
+.pipe-row {
+  width: 100%;
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 0; height: 60px; position: relative;
+}
+
+/* ── BOMBS ROW ── */
+.bombs-row {
+  display: flex; gap: 48px;
+  align-items: flex-start; justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── BOMB CARD ── */
+.bomb-card {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+  position: relative;
+}
+
+/* pipe coming down into bomb */
+.bomb-pipe-top {
+  width: 20px; height: 36px;
+  background: linear-gradient(90deg, var(--pipe-lt) 0%, var(--pipe) 40%, var(--pipe-lt) 100%);
+  border-radius: 3px 3px 0 0;
+  position: relative;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.4);
+}
+.bomb-pipe-top::after {
+  content: '';
+  position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+  width: 8px; height: 8px;
+  background: radial-gradient(circle at 35% 35%, var(--brass-lt), var(--brass-dk));
+  border-radius: 50%;
+}
+
+/* bomb body */
+.bomb-body {
+  width: 150px;
+  background: var(--bomb-bg);
+  border: 2px solid var(--bomb-border);
+  border-radius: 6px;
+  padding: 14px 0 18px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 0;
+  position: relative;
+  transition: border-color 0.4s, box-shadow 0.4s;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 4px 12px rgba(0,0,0,0.7);
+}
+.bomb-body.defused  {
+  border-color: #1a5c30;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 16px rgba(50,180,90,0.3);
+}
+.bomb-body.exploded {
+  border-color: #5c1a0a;
+  animation: shake 0.45s ease;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 20px rgba(180,50,20,0.4);
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0) rotate(0); }
+  20% { transform: translateX(-7px) rotate(-1.5deg); }
+  40% { transform: translateX(7px) rotate(1.5deg); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* rivet corners on bomb */
+.bomb-body::before, .bomb-body::after,
+.bomb-rivet-bl, .bomb-rivet-br {
+  content: '';
+  position: absolute;
+  width: 6px; height: 6px;
+  background: radial-gradient(circle at 35% 35%, #3a2a10, #1a1005);
+  border-radius: 50%;
+  border: 1px solid #2a1a08;
+}
+.bomb-body::before { top: 5px; left: 5px; }
+.bomb-body::after  { top: 5px; right: 5px; }
+.bomb-rivet-bl     { bottom: 5px; left: 5px; }
+.bomb-rivet-br     { bottom: 5px; right: 5px; }
+
+/* LED pressure gauge style */
+.led-gauge {
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 12px; gap: 3px;
+}
+.led-ring {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid #1a1005;
+  display: flex; align-items: center; justify-content: center;
+  background: #080503;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+}
+.led {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 5px var(--red), 0 0 10px rgba(200,30,0,0.5);
+  transition: background 0.5s, box-shadow 0.5s;
+  animation: blink 1.4s ease-in-out infinite;
+}
+.led.green {
+  background: var(--green);
+  box-shadow: 0 0 5px var(--green), 0 0 12px rgba(50,200,100,0.5);
+  animation: none;
+}
+.led.off { background: #1a1005; box-shadow: none; animation: none; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* WIRES */
+.wires-container {
+  display: flex; gap: 14px;
+  padding: 0 12px; width: 100%; justify-content: center;
+}
+.wire-slot {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 0;
+  cursor: pointer;
+}
+.wire-slot.cut { pointer-events: none; }
+
+.wire-connector-top {
+  width: 10px; height: 7px;
+  background: linear-gradient(180deg, #2a1a08, #1a1005);
+  border: 1px solid #3a2a10;
+  border-radius: 2px 2px 0 0; flex-shrink: 0;
+}
+.wire-line {
+  width: 5px; height: 80px; border-radius: 2.5px;
+  transition: filter 0.2s, transform 0.15s;
+}
+.wire-slot:not(.cut):hover .wire-line {
+  filter: brightness(1.5) saturate(1.3);
+  transform: scaleX(1.4);
+}
+.wire-slot:not(.cut):active .wire-line {
+  transform: scaleX(0.7) scaleY(0.96);
+}
+.wire-red    { background: linear-gradient(180deg, #881500 0%, #cc2200 45%, #881500 100%); }
+.wire-blue   { background: linear-gradient(180deg, #163888 0%, #2255cc 45%, #163888 100%); }
+.wire-yellow { background: linear-gradient(180deg, #997700 0%, #ddaa00 45%, #997700 100%); }
+
+.wire-connector-bot {
+  width: 10px; height: 7px;
+  background: linear-gradient(180deg, #1a1005, #2a1a08);
+  border: 1px solid #3a2a10;
+  border-radius: 0 0 2px 2px; flex-shrink: 0;
+}
+.wire-num {
+  font-size: 9px; color: #3a2a10; margin-top: 3px;
+  font-family: 'Special Elite', cursive;
+}
+
+/* CUT wire */
+.wire-slot.cut .wire-line { background: none !important; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+.wire-slot.cut .wire-line::before,
+.wire-slot.cut .wire-line::after {
+  content: ''; position: absolute; left: 0; width: 100%; border-radius: 2.5px;
+}
+.wire-slot.cut .wire-line::before { top: 0; height: 36px; }
+.wire-slot.cut .wire-line::after  { bottom: 0; height: 36px; }
+.wire-slot.cut.wire-red-cut .wire-line::before,
+.wire-slot.cut.wire-red-cut .wire-line::after   { background: #881500; }
+.wire-slot.cut.wire-blue-cut .wire-line::before,
+.wire-slot.cut.wire-blue-cut .wire-line::after  { background: #163888; }
+.wire-slot.cut.wire-yellow-cut .wire-line::before,
+.wire-slot.cut.wire-yellow-cut .wire-line::after{ background: #997700; }
+
+/* STATUS OVERLAY */
+.status-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border-radius: 4px; opacity: 0;
+  transition: opacity 0.4s; pointer-events: none;
+}
+.status-overlay.show { opacity: 1; }
+.status-overlay.explode { background: rgba(100,20,0,0.12); }
+.status-overlay.defuse  { background: rgba(20,80,30,0.10); }
+.defuse-mark {
+  font-family: 'Cinzel', serif;
+  font-size: 24px; font-weight: 700;
+  color: var(--green);
+  text-shadow: 0 0 14px rgba(50,200,80,0.6);
+  animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+
+/* STEAM on explode */
+.smoke-container {
+  position: absolute; inset: 0;
+  pointer-events: none; overflow: hidden; border-radius: 6px;
+}
+.smoke {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,180,140,0.55) 0%, transparent 70%);
+  animation: smokeRise 1.8s ease-out forwards;
+}
+@keyframes smokeRise {
+  0%   { transform: translateY(0) scale(0.3); opacity: 0.9; }
+  50%  { opacity: 0.5; }
+  100% { transform: translateY(-90px) scale(3); opacity: 0; }
+}
+
+/* bomb status text */
+.bomb-status {
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.15em; height: 18px;
+  color: transparent; transition: color 0.3s;
+}
+.bomb-status.defused  { color: var(--green); text-shadow: 0 0 8px rgba(50,200,80,0.4); }
+.bomb-status.exploded { color: var(--rust);  text-shadow: 0 0 8px rgba(150,50,20,0.4); }
+
+/* pipe bottom of bomb */
+.bomb-pipe-bot {
+  width: 20px; height: 24px;
+  background: linear-gradient(90deg, var(--pipe-lt) 0%, var(--pipe) 40%, var(--pipe-lt) 100%);
+  border-radius: 0 0 3px 3px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+/* ── BOTTOM PANEL ── */
+.bottom-panel {
+  width: 100%;
+  background: var(--bg2);
+  border: 2px solid var(--copper-dk);
+  border-radius: 4px;
+  padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+  position: relative;
+}
+.bottom-panel::before,
+.bottom-panel::after {
+  content: '';
+  position: absolute;
+  width: 10px; height: 10px;
+  background: radial-gradient(circle at 35% 35%, var(--brass-lt), var(--brass-dk));
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  bottom: 8px;
+}
+.bottom-panel::before { left: 8px; }
+.bottom-panel::after  { right: 8px; }
+
+.message {
+  font-family: 'Cinzel', serif;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.15em; color: var(--text-dim);
+  transition: color 0.3s; flex: 1; text-align: center;
+}
+.message.win  { color: var(--green); text-shadow: 0 0 10px rgba(50,200,80,0.4); }
+.message.fail { color: var(--rust);  text-shadow: 0 0 10px rgba(150,50,20,0.4); }
+
+.reset-btn {
+  background: linear-gradient(180deg, var(--copper) 0%, var(--copper-dk) 100%);
+  border: 1px solid var(--copper-dk);
+  color: var(--bg);
+  font-family: 'Cinzel', serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 7px 16px; cursor: pointer;
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: filter 0.2s, transform 0.1s;
+  display: none;
+}
+.reset-btn:hover  { filter: brightness(1.2); }
+.reset-btn:active { transform: translateY(1px); }
+.reset-btn.show   { display: block; }
+
+/* ── SIDE PIPES (decorative) ── */
+.side-pipe {
+  position: fixed;
+  pointer-events: none; z-index: 3;
+}
+
+/* pressure gauge dial */
+.gauge {
+  width: 44px; height: 44px;
+  background: radial-gradient(circle, #1a1208 60%, #0a0805 100%);
+  border: 2px solid var(--copper-dk);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6), inset 0 0 8px rgba(0,0,0,0.5);
+  position: relative;
+  flex-shrink: 0;
+}
+.gauge-needle {
+  width: 2px; height: 14px;
+  background: var(--rust);
+  border-radius: 1px;
+  transform-origin: bottom center;
+  position: absolute;
+  bottom: 50%;
+  animation: needleWobble 4s ease-in-out infinite;
+}
+@keyframes needleWobble {
+  0%,100% { transform: rotate(-30deg); }
+  50%     { transform: rotate(60deg); }
+}
+
+.gauges-row {
+  display: flex; gap: 12px; align-items: center;
+  justify-content: center;
+}
+</style>
+</head>
+<body>
+
+<!-- ambient steam emitters -->
+<div class="steam-emitter" id="steamLeft"  style="left:5%;  bottom:20%;"></div>
+<div class="steam-emitter" id="steamRight" style="right:5%; bottom:30%;"></div>
+<div class="steam-emitter" id="steamMid"   style="left:48%; bottom:10%;"></div>
+
+<!-- SVG pipe background -->
+<svg class="pipes-bg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pipeH" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a5530"/>
+      <stop offset="40%" stop-color="#5c3d1e"/>
+      <stop offset="100%" stop-color="#3a2510"/>
+    </linearGradient>
+    <linearGradient id="pipeV" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7a5530"/>
+      <stop offset="40%" stop-color="#5c3d1e"/>
+      <stop offset="100%" stop-color="#3a2510"/>
+    </linearGradient>
+  </defs>
+  <!-- left pipes -->
+  <rect x="0" y="200" width="120" height="18" fill="url(#pipeH)" rx="2"/>
+  <rect x="80" y="200" width="18" height="200" fill="url(#pipeV)" rx="2"/>
+  <rect x="0" y="380" width="100" height="18" fill="url(#pipeH)" rx="2"/>
+  <rect x="20" y="500" width="80" height="16" fill="url(#pipeH)" rx="2"/>
+  <rect x="20" y="380" width="18" height="140" fill="url(#pipeV)" rx="2"/>
+  <!-- rivets left -->
+  <circle cx="100" cy="209" r="6" fill="#9b7a3a"/><circle cx="100" cy="209" r="3" fill="#c8a84b"/>
+  <circle cx="60"  cy="209" r="6" fill="#9b7a3a"/><circle cx="60"  cy="209" r="3" fill="#c8a84b"/>
+  <circle cx="89"  cy="300" r="6" fill="#9b7a3a"/><circle cx="89"  cy="300" r="3" fill="#c8a84b"/>
+  <circle cx="89"  cy="250" r="6" fill="#9b7a3a"/><circle cx="89"  cy="250" r="3" fill="#c8a84b"/>
+  <!-- right pipes -->
+  <rect x="1080" y="180" width="120" height="18" fill="url(#pipeH)" rx="2"/>
+  <rect x="1100" y="180" width="18" height="220" fill="url(#pipeV)" rx="2"/>
+  <rect x="1090" y="380" width="110" height="18" fill="url(#pipeH)" rx="2"/>
+  <rect x="1090" y="480" width="110" height="16" fill="url(#pipeH)" rx="2"/>
+  <rect x="1090" y="380" width="18" height="116" fill="url(#pipeV)" rx="2"/>
+  <!-- rivets right -->
+  <circle cx="1100" cy="189" r="6" fill="#9b7a3a"/><circle cx="1100" cy="189" r="3" fill="#c8a84b"/>
+  <circle cx="1140" cy="189" r="6" fill="#9b7a3a"/><circle cx="1140" cy="189" r="3" fill="#c8a84b"/>
+  <circle cx="1109" cy="280" r="6" fill="#9b7a3a"/><circle cx="1109" cy="280" r="3" fill="#c8a84b"/>
+  <!-- top pipes -->
+  <rect x="300" y="0"  width="16" height="80"  fill="url(#pipeV)" rx="2"/>
+  <rect x="600" y="0"  width="16" height="60"  fill="url(#pipeV)" rx="2"/>
+  <rect x="880" y="0"  width="16" height="90"  fill="url(#pipeV)" rx="2"/>
+  <rect x="290" y="60" width="310" height="16" fill="url(#pipeH)" rx="2"/>
+  <rect x="590" y="44" width="310" height="16" fill="url(#pipeH)" rx="2"/>
+  <!-- T-joints -->
+  <circle cx="308" cy="68"  r="10" fill="#9b7a3a"/><circle cx="308" cy="68"  r="5" fill="#c8a84b"/>
+  <circle cx="608" cy="52"  r="10" fill="#9b7a3a"/><circle cx="608" cy="52"  r="5" fill="#c8a84b"/>
+  <circle cx="888" cy="76"  r="10" fill="#9b7a3a"/><circle cx="888" cy="76"  r="5" fill="#c8a84b"/>
+  <!-- bottom pipes -->
+  <rect x="200" y="720" width="800" height="18" fill="url(#pipeH)" rx="2"/>
+  <rect x="350" y="660" width="16"  height="80" fill="url(#pipeV)" rx="2"/>
+  <rect x="830" y="660" width="16"  height="80" fill="url(#pipeV)" rx="2"/>
+  <circle cx="358" cy="728" r="10" fill="#9b7a3a"/><circle cx="358" cy="728" r="5" fill="#c8a84b"/>
+  <circle cx="838" cy="728" r="10" fill="#9b7a3a"/><circle cx="838" cy="728" r="5" fill="#c8a84b"/>
+</svg>
+
+<div class="content">
+
+  <!-- HEADER -->
+  <div class="header-panel">
+    <div class="title-row">
+      <span class="gear-icon">⚙</span>
+      <span class="header-title">EXPLOSIVE ORDNANCE UNIT</span>
+      <span class="gear-icon rev">⚙</span>
+    </div>
+    <div class="header-sub">— DEFUSAL APPARATUS Mk. IV —</div>
+  </div>
+
+  <!-- PRESSURE GAUGES -->
+  <div class="gauges-row">
+    <div class="gauge"><div class="gauge-needle" style="animation-delay:-1s"></div></div>
+    <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-align:center;">PRESSURE<br>NOMINAL</div>
+    <div class="gauge"><div class="gauge-needle" style="animation-delay:-2.5s"></div></div>
+    <div style="font-size:10px;color:var(--text-dim);letter-spacing:0.15em;text-align:center;">STEAM<br>FLOW</div>
+    <div class="gauge"><div class="gauge-needle" style="animation-delay:-0.5s"></div></div>
+  </div>
+
+  <!-- BOMBS -->
+  <div class="bombs-row" id="bombsRow"></div>
+
+  <!-- BOTTOM PANEL -->
+  <div class="bottom-panel">
+    <div class="message" id="message">ตัดสายเพื่อกู้ระเบิด</div>
+    <button class="reset-btn" id="resetBtn" onclick="resetGame()">NEXT ROUND</button>
+  </div>
+
+</div>
+
+<script>
+// ── BOMB DATA ─────────────────────────────────────────────────────────────
+const BOMBS = [
+  { wires: ['red','blue','yellow'],            answer: 1 }, // RBY  → cut B
+  { wires: ['blue','yellow','blue'],           answer: 0 }, // BYB  → cut B
+  { wires: ['red','yellow','blue','red'],      answer: 2 }, // RYBR → cut B
+  { wires: ['yellow','blue','red','yellow'],   answer: 3 }, // YBRY → cut Y
+  { wires: ['yellow','red','red','blue'],      answer: 2 }, // YRRB → cut R
+  { wires: ['blue','blue','red','red'],        answer: 0 }, // BBRR → cut B
+];
+
+// ── STEAM LOOP ────────────────────────────────────────────────────────────
+function spawnSteam(emitterId, interval) {
+  const el = document.getElementById(emitterId);
+  if (!el) return;
+  setInterval(() => {
+    const p = document.createElement('div');
+    p.className = 'steam-puff';
+    const size = 18 + Math.random() * 28;
+    const dx = (Math.random() - 0.5) * 40;
+    p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*30}px;bottom:0;--dx:${dx}px;animation-duration:${2.5+Math.random()}s;`;
+    el.appendChild(p);
+    setTimeout(() => p.remove(), 3800);
+  }, interval);
+}
+spawnSteam('steamLeft',  900);
+spawnSteam('steamRight', 1300);
+spawnSteam('steamMid',   1700);
+
+// ── PICK 2 RANDOM ────────────────────────────────────────────────────────
+function pickRandom2() {
+  return [...BOMBS].sort(() => Math.random() - 0.5).slice(0, 2);
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let activeBombs = [];
+let state = [];
+let gameOver = false;
+
+// ── BUILD ────────────────────────────────────────────────────────────────
+function buildBombs() {
+  const container = document.getElementById('bombsRow');
+  container.innerHTML = '';
+
+  activeBombs.forEach((bomb, bi) => {
+    const card = document.createElement('div');
+    card.className = 'bomb-card';
+    card.innerHTML = `
+      <div class="bomb-pipe-top"></div>
+      <div class="bomb-body" id="body-${bi}">
+        <div class="bomb-rivet-bl"></div>
+        <div class="bomb-rivet-br"></div>
+        <div class="led-gauge">
+          <div class="led-ring"><div class="led" id="led-${bi}"></div></div>
+        </div>
+        <div class="wires-container" id="wires-${bi}"></div>
+        <div class="smoke-container" id="smoke-${bi}"></div>
+        <div class="status-overlay" id="overlay-${bi}">
+          <span class="defuse-mark" id="defmark-${bi}">✓</span>
+        </div>
+      </div>
+      <div class="bomb-pipe-bot"></div>
+      <div class="bomb-status" id="status-${bi}"></div>
+    `;
+    container.appendChild(card);
+
+    const wiresDiv = card.querySelector(`#wires-${bi}`);
+    bomb.wires.forEach((color, wi) => {
+      const slot = document.createElement('div');
+      slot.className = 'wire-slot';
+      slot.id = `wire-${bi}-${wi}`;
+      slot.innerHTML = `
+        <div class="wire-connector-top"></div>
+        <div class="wire-line wire-${color}"></div>
+        <div class="wire-connector-bot"></div>
+        <div class="wire-num">${wi + 1}</div>
+      `;
+      slot.addEventListener('click', () => onWireCut(bi, wi));
+      wiresDiv.appendChild(slot);
+    });
+  });
+}
+
+// ── CUT WIRE ─────────────────────────────────────────────────────────────
+function onWireCut(bombIdx, wireIdx) {
+  if (gameOver) return;
+  const s = state[bombIdx];
+  if (s.defused || s.exploded) return;
+
+  const bomb = activeBombs[bombIdx];
+  const slot = document.getElementById(`wire-${bombIdx}-${wireIdx}`);
+  const color = bomb.wires[wireIdx];
+  slot.classList.add('cut', `wire-${color}-cut`);
+
+  wireIdx === bomb.answer ? triggerDefuse(bombIdx) : triggerExplode(bombIdx);
+}
+
+function triggerDefuse(bi) {
+  state[bi].defused = true;
+  document.getElementById(`body-${bi}`).classList.add('defused');
+  document.getElementById(`led-${bi}`).className = 'led green';
+  document.getElementById(`status-${bi}`).textContent = 'DEFUSED';
+  document.getElementById(`status-${bi}`).className = 'bomb-status defused';
+  const ov = document.getElementById(`overlay-${bi}`);
+  ov.classList.add('show','defuse');
+  document.querySelectorAll(`[id^="wire-${bi}-"]`).forEach(el => el.style.pointerEvents = 'none');
+  checkWin();
+}
+
+function triggerExplode(bi) {
+  state[bi].exploded = true;
+  document.getElementById(`body-${bi}`).classList.add('exploded');
+  document.getElementById(`led-${bi}`).className = 'led off';
+  document.getElementById(`status-${bi}`).textContent = 'DETONATED';
+  document.getElementById(`status-${bi}`).className = 'bomb-status exploded';
+  const ov = document.getElementById(`overlay-${bi}`);
+  ov.classList.add('show','explode');
+  const dm = document.getElementById(`defmark-${bi}`);
+  dm.textContent = '✕'; dm.style.color = 'var(--rust)'; dm.style.textShadow = '0 0 14px rgba(150,50,20,0.6)';
+
+  // steam puff explosion
+  const smoke = document.getElementById(`smoke-${bi}`);
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'smoke';
+      const size = 18 + Math.random() * 44;
+      p.style.cssText = `width:${size}px;height:${size}px;left:${10+Math.random()*110}px;bottom:${5+Math.random()*40}px;animation-delay:${Math.random()*0.35}s;animation-duration:${1.4+Math.random()*0.8}s;`;
+      smoke.appendChild(p);
+    }, i * 55);
+  }
+  document.querySelectorAll(`[id^="wire-${bi}-"]`).forEach(el => el.style.pointerEvents = 'none');
+  checkFail();
+}
+
+function checkWin() {
+  if (state.every(s => s.defused)) {
+    gameOver = true;
+    document.getElementById('message').textContent = '✓  BOTH DEVICES NEUTRALISED';
+    document.getElementById('message').className = 'message win';
+    document.getElementById('resetBtn').classList.add('show');
+  }
+}
+
+function checkFail() {
+  if (!gameOver && state.some(s => s.exploded)) {
+    gameOver = true;
+    document.getElementById('message').textContent = '✕  CATASTROPHIC DETONATION';
+    document.getElementById('message').className = 'message fail';
+    document.getElementById('resetBtn').classList.add('show');
+    state.forEach((s, i) => { if (!s.defused && !s.exploded) triggerExplode(i); });
+  }
+}
+
+function resetGame() {
+  gameOver = false;
+  activeBombs = pickRandom2();
+  state = activeBombs.map(() => ({ defused: false, exploded: false }));
+  document.getElementById('message').textContent = 'ตัดสายเพื่อกู้ระเบิด';
+  document.getElementById('message').className = 'message';
+  document.getElementById('resetBtn').classList.remove('show');
+  buildBombs();
+}
+
+resetGame();
+</script>
+</body>
+</html>

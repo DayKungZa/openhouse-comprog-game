@@ -1,0 +1,309 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Share+Tech+Mono&display=swap');
+  .game-wrap{font-family:'Share Tech Mono',monospace;background:#1a1208;border:2px solid #8B6914;border-radius:8px;padding:20px;max-width:600px;margin:0 auto;box-shadow:inset 0 0 40px rgba(0,0,0,0.6);position:relative;}
+  .game-wrap::before{content:'';position:absolute;inset:0;border-radius:6px;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,180,0,0.015) 2px,rgba(255,180,0,0.015) 4px);pointer-events:none;z-index:0;}
+  .title-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;border-bottom:1px solid #5a4010;padding-bottom:10px;position:relative;z-index:1;}
+  .title-bar h1{font-family:'Special Elite',serif;color:#d4920a;font-size:18px;font-weight:normal;margin:0;letter-spacing:2px;text-transform:uppercase;}
+  .gear-icon{font-size:20px;display:inline-block;animation:spin 8s linear infinite;color:#8B6914;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .status-bar{font-size:12px;color:#c4840a;background:#0d0a05;border:1px solid #3a2a08;border-radius:4px;padding:6px 10px;margin-bottom:14px;min-height:28px;letter-spacing:1px;display:flex;align-items:center;gap:6px;position:relative;z-index:1;}
+  .blink{animation:blink 1s step-end infinite;color:#ffb800;}
+  @keyframes blink{50%{opacity:0;}}
+  .grid-container{display:inline-grid;gap:2px;background:#0a0704;border:2px solid #5a4010;border-radius:4px;padding:4px;margin-bottom:16px;position:relative;z-index:1;}
+  .cell{display:flex;align-items:center;justify-content:center;position:relative;border-radius:2px;overflow:hidden;}
+  .cell-unseen{background:#050402;border:1px solid #0f0b06;}
+  .cell-floor{background:#1e1508;border:1px solid #2e1f06;}
+  .cell-floor::after{content:'';position:absolute;inset:4px;border:1px solid #2a1c06;border-radius:1px;opacity:0.4;}
+  .cell-wall{background:#0d0a04;border:1px solid #3a2a06;}
+  .cell-key{background:#1e1508;border:1px solid #2e1f06;}
+  .cell-memory::before{content:'';position:absolute;inset:0;background:rgba(5,4,2,0.52);z-index:3;pointer-events:none;}
+  .wall-inner{width:100%;height:100%;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1px;background:#1a1206;padding:2px;}
+  .wall-brick{background:#2d200a;border:1px solid #1a1206;border-radius:1px;}
+  .wall-brick:nth-child(even){background:#261c09;}
+  .key-glow{position:absolute;width:32px;height:32px;background:radial-gradient(circle,rgba(255,200,0,0.25) 0%,transparent 70%);border-radius:50%;animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+  .key-svg{position:relative;z-index:1;}
+  .robot-sprite{position:relative;z-index:2;display:block;}
+  @keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-4px,3px)}40%{transform:translate(4px,-3px)}60%{transform:translate(-3px,2px)}80%{transform:translate(3px,-2px)}}
+  .shaking{animation:shake 0.4s ease;}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;z-index:1;}
+  .btn{background:#1a1208;color:#d4920a;border:1px solid #7a5610;border-radius:4px;padding:10px 8px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.1s;position:relative;overflow:hidden;}
+  .btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(212,146,10,0.1),transparent);transition:left 0.3s;}
+  .btn:hover::before{left:100%;}
+  .btn:hover{background:#261b0c;border-color:#c4840a;color:#ffb800;}
+  .btn:active{transform:scale(0.97);background:#0d0a05;}
+  .btn-pickup{border-color:#c4840a;color:#ffb800;font-size:13px;padding:12px;background:#1e1508;}
+  .divider{height:1px;background:#3a2a08;margin:12px 0;position:relative;z-index:1;}
+  .legend{display:flex;gap:14px;font-size:11px;color:#7a6030;letter-spacing:0.5px;position:relative;z-index:1;flex-wrap:wrap;}
+  .legend-item{display:flex;align-items:center;gap:4px;}
+  .legend-dot{width:10px;height:10px;border-radius:1px;}
+  .end-overlay{position:absolute;inset:0;background:rgba(10,7,2,0.92);border-radius:6px;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:20;gap:8px;}
+  .end-title{font-family:'Special Elite',serif;font-size:28px;letter-spacing:4px;animation:flicker 2s infinite;}
+  .end-title-win{color:#ffb800;text-shadow:0 0 20px rgba(255,184,0,0.5);}
+  .end-title-dead{color:#e05a00;text-shadow:0 0 20px rgba(224,90,0,0.5);}
+  @keyframes flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:0.7}94%{opacity:1}96%{opacity:0.8}97%{opacity:1}}
+  .end-sub{font-size:13px;letter-spacing:2px;}
+  .end-sub-win{color:#c4840a;}
+  .end-sub-dead{color:#b04000;}
+  .btn-restart{background:#261b0c;color:#ffb800;border:1px solid #c4840a;border-radius:4px;padding:10px 24px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-top:8px;}
+  .btn-restart:hover{background:#3a2810;}
+</style>
+
+<div class="game-wrap" id="gameWrap">
+  <div class="end-overlay" id="endOverlay">
+    <div class="end-title" id="endTitle"></div>
+    <div class="end-sub" id="endSub"></div>
+    <button class="btn-restart" onclick="restartGame()">↺ Restart</button>
+  </div>
+  <div class="title-bar">
+    <span class="gear-icon">⚙</span>
+    <h1>Ironhaven Factory</h1>
+    <span class="gear-icon" style="animation-direction:reverse;font-size:14px;">⚙</span>
+  </div>
+  <div class="status-bar" id="statusBar">
+    <span class="blink">►</span>
+    <span id="statusText">Unit R-7 online. Navigate to the key.</span>
+  </div>
+  <div style="display:flex;justify-content:center;">
+    <div class="grid-container" id="grid"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="controls">
+    <button class="btn" onclick="doMove()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2L12 10H2L7 2Z" fill="currentColor"/></svg>Move
+    </button>
+    <button class="btn btn-pickup" onclick="doPickup()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M4 9h6v3H4z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>Pick Up
+    </button>
+    <button class="btn" onclick="doTurn(-1)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7C3 4.8 4.8 3 7 3h2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 1L9 3L6 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>Turn Left
+    </button>
+    <button class="btn" onclick="doTurn(1)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7C11 4.8 9.2 3 7 3H5" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M8 1L5 3L8 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/></svg>Turn Right
+    </button>
+  </div>
+  <div class="divider"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#050402;border:1px solid #0f0b06"></div>Unknown</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1e1508;border:1px solid #3a2808;opacity:0.5"></div>Memory</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1e1508;border:1px solid #3a2808"></div>Current</div>
+  </div>
+</div>
+
+<script>
+const _G='G',_W='W',_K='K',_S='S';
+const BASE_MAP=[
+  [_G,_G,_G,_W,_W,_W,_W],
+  [_G,_W,_G,_G,_G,_G,_W],
+  [_G,_W,_W,_K,_W,_G,_G],
+  [_G,_G,_W,_W,_W,_W,_G],
+  [_W,_G,_G,_G,_G,_G,_G],
+  [_W,_G,_W,_G,_W,_G,_W],
+  [_W,_W,_W,_S,_W,_W,_W],
+];
+const ROWS=7,COLS=7,CELL=62;
+const KEY_POS={r:2,c:3},START={r:6,c:3};
+const DIRS=[{dr:-1,dc:0,label:'N'},{dr:0,dc:1,label:'E'},{dr:1,dc:0,label:'S'},{dr:0,dc:-1,label:'W'}];
+let map,robot,visited,gameOver;
+
+function initState(){
+  map=BASE_MAP.map(r=>[...r]);
+  robot={r:START.r,c:START.c,dir:0};
+  gameOver=false;
+  visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  visited[robot.r][robot.c]=true;
+}
+function revealAll(){for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)visited[r][c]=true;}
+function setStatus(msg){document.getElementById('statusText').textContent=msg;}
+function wallHTML(){let b='';for(let i=0;i<9;i++)b+='<div class="wall-brick"></div>';return`<div class="wall-inner">${b}</div>`;}
+function keySVG(){return`<div class="key-glow"></div><svg class="key-svg" width="34" height="34" viewBox="0 0 40 40"><circle cx="16" cy="16" r="9" fill="none" stroke="#d4920a" stroke-width="2.5"/><circle cx="16" cy="16" r="5" fill="none" stroke="#d4920a" stroke-width="1.5"/><line x1="22" y1="22" x2="34" y2="34" stroke="#d4920a" stroke-width="2.5" stroke-linecap="round"/><rect x="28" y="29" width="5" height="3" rx="1" fill="#d4920a"/><rect x="30" y="32" width="3" height="4" rx="1" fill="#d4920a"/><circle cx="16" cy="16" r="2" fill="#ffb800"/></svg>`;}
+
+function robotSVG(dir, exploded){
+  if(exploded){
+    return`<svg class="robot-sprite" width="58" height="58" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="34" fill="#3a1500" stroke="#e05a00" stroke-width="2" opacity="0.85"/>
+      <circle cx="60" cy="60" r="20" fill="#e05a00" opacity="0.7"/>
+      <circle cx="60" cy="60" r="10" fill="#ffb800"/>
+      ${[0,45,90,135,180,225,270,315].map((a,i)=>{
+        const rad=a*Math.PI/180,len=18+(i%3)*8;
+        const x2=(60+Math.cos(rad)*(34+len)).toFixed(1);
+        const y2=(60+Math.sin(rad)*(34+len)).toFixed(1);
+        return`<line x1="60" y1="60" x2="${x2}" y2="${y2}" stroke="#e05a00" stroke-width="${i%2===0?3:2}" stroke-linecap="round" opacity="0.85"/>`;
+      }).join('')}
+    </svg>`;
+  }
+
+  // dir: 0=N, 1=E, 2=S, 3=W
+  // The provided SVG has robot facing UP (North) and arrow at top-right pointing UP
+  // Arrow original position: translate(100,30), pointing up
+  // We rotate the entire unit (robot+arrow) around center (60,60)
+  // dir=0(N)=0deg, dir=1(E)=90deg, dir=2(S)=180deg, dir=3(W)=270deg
+  const rotateDeg = dir * 90;
+
+  return`<svg class="robot-sprite" width="58" height="58" viewBox="0 0 120 120" style="transition:transform 0.18s;">
+    <g transform="rotate(${rotateDeg}, 60, 60)">
+
+      <!-- Robot body centered at (60,65) as in original -->
+      <g transform="translate(60, 65)">
+        <!-- Antenna -->
+        <rect x="-2" y="-38" width="4" height="10" rx="1" fill="#7A6332"/>
+        <circle cx="0" cy="-40" r="4" fill="#C8A84E"/>
+        <!-- Head outer -->
+        <rect x="-22" y="-28" width="44" height="36" rx="6" fill="#5C4A2A"/>
+        <!-- Head inner -->
+        <rect x="-19" y="-25" width="38" height="30" rx="4" fill="#7A6332"/>
+        <!-- Left eye -->
+        <circle cx="-8" cy="-12" r="9" fill="#B8860B"/>
+        <circle cx="-8" cy="-12" r="7" fill="#DAA520"/>
+        <circle cx="-8" cy="-12" r="3.5" fill="#2B1D0E"/>
+        <circle cx="-6" cy="-14" r="1.5" fill="#C8A84E"/>
+        <!-- Right eye -->
+        <circle cx="8" cy="-12" r="9" fill="#B8860B"/>
+        <circle cx="8" cy="-12" r="7" fill="#DAA520"/>
+        <circle cx="8" cy="-12" r="3.5" fill="#2B1D0E"/>
+        <circle cx="10" cy="-14" r="1.5" fill="#C8A84E"/>
+        <!-- Mouth -->
+        <rect x="-10" y="0" width="20" height="4" rx="2" fill="#5C4A2A"/>
+        <rect x="-6" y="1" width="3" height="2" rx="0.5" fill="#C8A84E"/>
+        <rect x="-1" y="1" width="3" height="2" rx="0.5" fill="#C8A84E"/>
+        <rect x="4" y="1" width="3" height="2" rx="0.5" fill="#C8A84E"/>
+        <!-- Body -->
+        <rect x="-18" y="10" width="36" height="24" rx="5" fill="#5C4A2A"/>
+        <rect x="-14" y="13" width="28" height="18" rx="3" fill="#7A6332"/>
+        <!-- Body detail -->
+        <rect x="-6" y="16" width="12" height="12" rx="2" fill="#5C4A2A"/>
+        <rect x="-4" y="18" width="8" height="8" rx="1" fill="#C8A84E"/>
+        <!-- Arms -->
+        <rect x="-26" y="12" width="6" height="18" rx="3" fill="#7A6332"/>
+        <rect x="20" y="12" width="6" height="18" rx="3" fill="#7A6332"/>
+        <!-- Feet -->
+        <rect x="-14" y="34" width="10" height="6" rx="2" fill="#7A6332"/>
+        <rect x="4" y="34" width="10" height="6" rx="2" fill="#7A6332"/>
+      </g>
+
+      <!-- Arrow: top-right, pointing UP — translate(100,30) as in original -->
+      <g transform="translate(100, 30)">
+        <polygon points="0,-16 10,0 6,0 6,14 -6,14 -6,0 -10,0" fill="#DAA520"/>
+      </g>
+
+    </g>
+  </svg>`;
+}
+
+function renderGrid(exploded){
+  const grid=document.getElementById('grid');
+  grid.style.gridTemplateColumns=`repeat(${COLS},${CELL}px)`;
+  grid.style.gridTemplateRows=`repeat(${ROWS},${CELL}px)`;
+  grid.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');
+      cell.style.width=CELL+'px';cell.style.height=CELL+'px';
+      const t=map[r][c];
+      const isCurrent=robot.r===r&&robot.c===c;
+      const seen=visited[r][c];
+      if(!seen){
+        cell.className='cell cell-unseen';
+      } else if(isCurrent){
+        if(t===_W){cell.className='cell cell-wall';cell.innerHTML=wallHTML();}
+        else if(t===_K){cell.className='cell cell-key';}
+        else{cell.className='cell cell-floor';}
+        cell.innerHTML=robotSVG(robot.dir,exploded);
+      } else {
+        if(t===_W){cell.className='cell cell-wall cell-memory';cell.innerHTML=wallHTML();}
+        else if(t===_K){cell.className='cell cell-key cell-memory';cell.innerHTML=keySVG();}
+        else{cell.className='cell cell-floor cell-memory';}
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function triggerExplode(reason){
+  gameOver=true;
+  visited[robot.r][robot.c]=true;
+  renderGrid(true);
+  const g=document.getElementById('grid');
+  g.classList.add('shaking');
+  setTimeout(()=>g.classList.remove('shaking'),400);
+  setTimeout(()=>{revealAll();renderGrid(true);},500);
+  setTimeout(()=>{
+    const o=document.getElementById('endOverlay');
+    document.getElementById('endTitle').textContent='UNIT DESTROYED';
+    document.getElementById('endTitle').className='end-title end-title-dead';
+    document.getElementById('endSub').textContent=reason||'System failure. Reinitialise?';
+    document.getElementById('endSub').className='end-sub end-sub-dead';
+    o.style.display='flex';
+  },800);
+}
+
+function triggerWin(){
+  gameOver=true;revealAll();renderGrid(false);
+  setTimeout(()=>{
+    const o=document.getElementById('endOverlay');
+    document.getElementById('endTitle').textContent='MISSION COMPLETE';
+    document.getElementById('endTitle').className='end-title end-title-win';
+    document.getElementById('endSub').textContent='Key secured. Systems nominal.';
+    document.getElementById('endSub').className='end-sub end-sub-win';
+    o.style.display='flex';
+  },400);
+}
+
+function doMove(){
+  if(gameOver)return;
+  const d=DIRS[robot.dir];
+  const nr=robot.r+d.dr, nc=robot.c+d.dc;
+  if(nr<0||nr>=ROWS||nc<0||nc>=COLS){
+    setStatus('⚠ FELL OFF THE EDGE — Unit lost!');
+    triggerExplode('Fell off the edge. Reinitialise?');
+    return;
+  }
+  if(map[nr][nc]===_W){
+    robot.r=nr;robot.c=nc;
+    setStatus('⚠ COLLISION — Hull breach!');
+    triggerExplode('Wall collision. Reinitialise?');
+    return;
+  }
+  robot.r=nr;robot.c=nc;
+  visited[nr][nc]=true;
+  const onKey=robot.r===KEY_POS.r&&robot.c===KEY_POS.c;
+  setStatus(onKey?'[ KEY DETECTED ] Press PICK UP!':`Moving ${DIRS[robot.dir].label} → (${nr},${nc})`);
+  renderGrid(false);
+}
+
+function doTurn(delta){
+  if(gameOver)return;
+  robot.dir=(robot.dir+delta+4)%4;
+  setStatus(`Rotating... facing ${DIRS[robot.dir].label}.`);
+  renderGrid(false);
+}
+
+function doPickup(){
+  if(gameOver)return;
+  if(robot.r===KEY_POS.r&&robot.c===KEY_POS.c){
+    map[KEY_POS.r][KEY_POS.c]=_G;
+    setStatus('KEY SECURED!');
+    triggerWin();
+  } else {
+    setStatus('Nothing to pick up here.');
+  }
+}
+
+function restartGame(){
+  initState();
+  document.getElementById('endOverlay').style.display='none';
+  setStatus('Unit R-7 online. Navigate to the key.');
+  renderGrid(false);
+}
+
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='ArrowUp'||e.key==='w')doMove();
+  else if(e.key==='ArrowLeft'||e.key==='a')doTurn(-1);
+  else if(e.key==='ArrowRight'||e.key==='d')doTurn(1);
+  else if(e.key===' '||e.key==='e'){e.preventDefault();doPickup();}
+});
+
+initState();
+renderGrid(false);
+</script>
