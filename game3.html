@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LEVEL 3 BOMB DEFUSAL — Binary Search Protocol</title>
+<title>Level 2</title>
 <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Cutive+Mono&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -37,7 +37,6 @@
     position: relative;
   }
 
-  /* Riveted metal background texture */
   body::before {
     content: '';
     position: fixed;
@@ -60,7 +59,6 @@
     padding: 20px;
   }
 
-  /* ── HEADER ── */
   .header {
     text-align: center;
     margin-bottom: 20px;
@@ -105,7 +103,6 @@
     margin-top: 4px;
   }
 
-  /* ── MAIN PANEL ── */
   .panel {
     background: linear-gradient(145deg, #2e2415, #1e1810);
     border: 2px solid var(--brass-dark);
@@ -118,7 +115,6 @@
       0 4px 20px rgba(0,0,0,0.6);
   }
 
-  /* Corner rivets */
   .panel::before, .panel::after {
     content: '';
     position: absolute;
@@ -130,7 +126,6 @@
   .panel::before { top: 8px; left: 8px; }
   .panel::after { top: 8px; right: 8px; }
 
-  /* Extra rivets via pseudo elements on inner */
   .panel-inner::before, .panel-inner::after {
     content: '';
     position: absolute;
@@ -143,7 +138,6 @@
   .panel-inner::after { bottom: -16px; right: -16px; }
   .panel-inner { position: relative; }
 
-  /* ── BOMB VISUAL ── */
   .bomb-section {
     display: flex;
     flex-direction: column;
@@ -158,7 +152,6 @@
     margin-bottom: 16px;
   }
 
-  /* Bomb sphere */
   .bomb-body {
     width: 140px;
     height: 140px;
@@ -176,7 +169,6 @@
     transition: box-shadow 0.3s;
   }
 
-  /* Metal band on bomb */
   .bomb-body::after {
     content: '';
     position: absolute;
@@ -188,7 +180,6 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
 
-  /* Fuse */
   .fuse {
     position: absolute;
     top: 0; left: 50%;
@@ -204,7 +195,6 @@
     transform-origin: bottom center;
   }
 
-  /* LED lights row */
   .led-row {
     display: flex;
     gap: 10px;
@@ -242,7 +232,6 @@
     border-color: #222;
   }
 
-  /* ── DIVIDER ── */
   .divider {
     display: flex;
     align-items: center;
@@ -258,7 +247,6 @@
     background: linear-gradient(to right, transparent, var(--brass-dark), transparent);
   }
 
-  /* ── CODE DISPLAY ── */
   .code-display {
     width: 100%;
     padding: 14px 16px;
@@ -284,7 +272,6 @@
     pointer-events: none;
     cursor: default;
   }
-  /* scanline */
   .code-display::after {
     content: '';
     position: absolute;
@@ -298,7 +285,6 @@
   }
   .code-display.invalid { color: #ff4444; }
 
-  /* ── NUMPAD ── */
   .numpad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -380,7 +366,6 @@
       inset 0 2px 4px rgba(0,0,0,0.4);
   }
 
-  /* ── FEEDBACK DISPLAY ── */
   .feedback-box {
     min-height: 50px;
     display: flex;
@@ -406,7 +391,6 @@
   .feedback-box.correct { color: var(--green-win); }
   .feedback-box.idle   { color: var(--smoke); }
 
-  /* scanline effect */
   .feedback-box::after {
     content: '';
     position: absolute;
@@ -419,7 +403,6 @@
     pointer-events: none;
   }
 
-  /* ── HISTORY ── */
   .history-section {
     max-height: 180px;
     overflow-y: auto;
@@ -470,7 +453,6 @@
   .history-entry .attempt-result.lower  { color: #44aaff; }
   .history-entry .attempt-result.correct { color: var(--green-win); }
 
-  /* ── RANGE HINT ── */
   .range-display {
     font-family: 'Cutive Mono', monospace;
     font-size: 11px;
@@ -497,7 +479,6 @@
     opacity: 0.7;
   }
 
-  /* ── OVERLAY SCREENS ── */
   .overlay {
     position: fixed;
     inset: 0;
@@ -598,7 +579,6 @@
   .restart-btn:hover { background: linear-gradient(to bottom, #e0b565, #c49030); }
   .restart-btn:active { top: 4px; box-shadow: 0 0 0 #4a3008; }
 
-  /* ── EXPLOSION ── */
   .explosion-overlay {
     position: fixed;
     inset: 0;
@@ -635,7 +615,6 @@
     100% { transform: translate(var(--dx), var(--dy)) scale(0.1); opacity: 0; }
   }
 
-  /* ── SHAKE ── */
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     15% { transform: translateX(-8px) rotate(-1deg); }
@@ -655,7 +634,6 @@
 
   .bomb-body.win { animation: pulseCorrect 0.8s ease 3; }
 
-  /* ── MISC ── */
   .attempts-left { display: none; }
 
   .section-label {
@@ -673,17 +651,14 @@
 <body>
 
 <div class="main-wrapper">
-  <!-- Header -->
   <div class="header">
-    <h1>BOMB DEFUSAL - Level 3</h1>
-    <div class="subtitle">Input correct password from 1-100</div>
+    <h1>NUMBER BOMB DEFUSAL - Level 2</h1>
+    <div class="subtitle">Input correct password from 1-99</div>
   </div>
 
-  <!-- Main panel -->
   <div class="panel">
     <div class="panel-inner">
 
-      <!-- Bomb -->
       <div class="bomb-section">
         <div class="bomb-container" id="bombContainer">
           <div class="fuse" id="fuse"></div>
@@ -691,22 +666,17 @@
         </div>
 
         <div class="attempts-left" id="attemptsText"></div>
-        <div class="led-row" id="ledRow">
-          <!-- LEDs generated by JS -->
-        </div>
+        <div class="led-row" id="ledRow"></div>
       </div>
 
       <div class="divider">✦ INPUT DEFUSE CODE ✦</div>
 
-      <!-- Range bar -->
       <div class="range-bar-wrap">
         <div class="range-bar-fill" id="rangeBar" style="left:0%;right:0%"></div>
       </div>
 
-      <!-- Display -->
       <div class="code-display" id="guessDisplay">_</div>
 
-      <!-- Numpad -->
       <div class="numpad" id="numpad">
         <button class="num-btn" data-val="1" tabindex="-1">1</button>
         <button class="num-btn" data-val="2" tabindex="-1">2</button>
@@ -722,7 +692,6 @@
         <button class="num-btn enter-btn" id="submitBtn" data-action="submit" tabindex="-1">⏎</button>
       </div>
 
-      <!-- History -->
       <div class="history-section">
         <div class="history-list" id="historyList">
           <div style="font-family:'Cutive Mono',monospace;font-size:11px;color:#5c4a30;text-align:center;padding:10px;">
@@ -735,7 +704,6 @@
   </div>
 </div>
 
-<!-- Win/Lose overlay -->
 <div class="overlay" id="resultOverlay">
   <div class="result-panel">
     <span class="result-icon" id="resultIcon"></span>
@@ -747,7 +715,6 @@
   </div>
 </div>
 
-<!-- Explosion overlay -->
 <div class="explosion-overlay" id="explosionOverlay"></div>
 <div class="explosion-flash" id="explosionFlash"></div>
 
@@ -767,7 +734,7 @@ function setNumpadDisabled(disabled) {
 
 function numpadPress(val) {
   if (gameOver) return;
-  if (currentInput.length >= 3) return;
+  if (currentInput.length >= 2) return;
   currentInput += val;
   updateDisplay();
 }
@@ -778,38 +745,31 @@ function numpadClear() {
 }
 
 function initGame() {
-  secret = Math.floor(Math.random() * 100) + 1;
+  secret = Math.floor(Math.random() * 99) + 1;
   attemptsLeft = 7;
   rangeMin = 1;
-  rangeMax = 100;
+  rangeMax = 99;
   guesses = [];
   gameOver = false;
 
-  // Reset overlay
   document.getElementById('resultOverlay').classList.remove('active');
 
-  // Reset LEDs
   buildLEDs();
 
-  // Reset feedback
   setFeedback('AWAITING ACCESS CODE...', 'idle');
 
-  // Reset history
   document.getElementById('historyList').innerHTML = `
     <div style="font-family:'Cutive Mono',monospace;font-size:11px;color:#5c4a30;text-align:center;padding:10px;">
       — NO TRANSMISSIONS YET —
     </div>`;
 
-  // Reset bomb
   document.getElementById('bombBody').className = 'bomb-body';
   document.getElementById('explosionOverlay').innerHTML = '';
   document.getElementById('explosionFlash').style.animation = '';
   document.getElementById('explosionFlash').style.opacity = '';
 
-  // Reset range
   updateRange();
 
-  // Reset input
   currentInput = '';
   updateDisplay();
   setNumpadDisabled(false);
@@ -828,7 +788,6 @@ function buildLEDs() {
 }
 
 function turnOffLED(index) {
-  // Turn off from right to left (led6, led5, ...)
   const ledIndex = 6 - index;
   const led = document.getElementById(`led${ledIndex}`);
   if (led) {
@@ -845,21 +804,18 @@ function updateAttemptsText() {
   else el.style.color = '';
 }
 
-function setFeedback(text, cls) {
-  // feedback box removed
-}
+function setFeedback(text, cls) {}
 
 function updateRange() {
   const bar = document.getElementById('rangeBar');
-  const leftPct = ((rangeMin - 1) / 99) * 100;
-  const rightPct = ((100 - rangeMax) / 99) * 100;
+  const leftPct = ((rangeMin - 1) / 98) * 100;
+  const rightPct = ((99 - rangeMax) / 98) * 100;
   bar.style.left = leftPct + '%';
   bar.style.right = rightPct + '%';
 }
 
 function addHistory(attempt, val, result) {
   const list = document.getElementById('historyList');
-  // Remove placeholder
   const placeholder = list.querySelector('div[style]');
   if (placeholder) placeholder.remove();
 
@@ -877,17 +833,14 @@ function addHistory(attempt, val, result) {
   `;
   list.appendChild(entry);
 
-  // Scroll to bottom
   const section = list.closest('.history-section');
   if (section) section.scrollTop = section.scrollHeight;
 }
 
 function triggerExplosion() {
-  // Flash
   const flash = document.getElementById('explosionFlash');
   flash.style.animation = 'flash1 1.2s ease forwards';
 
-  // Particles
   const overlay = document.getElementById('explosionOverlay');
   overlay.innerHTML = '';
   const colors = ['#ff4400','#ff8800','#ffcc00','#ff2200','#ffffff'];
@@ -913,14 +866,12 @@ function triggerExplosion() {
     overlay.appendChild(p);
   }
 
-  // Shake panel
   const wrapper = document.querySelector('.main-wrapper');
   wrapper.classList.remove('shake');
   void wrapper.offsetWidth;
   wrapper.classList.add('shake');
   wrapper.addEventListener('animationend', () => wrapper.classList.remove('shake'), { once: true });
 
-  // Bomb glow red
   const bomb = document.getElementById('bombBody');
   bomb.style.boxShadow = '0 0 0 3px #ff0000, 0 0 40px rgba(255,0,0,0.8), 0 8px 30px rgba(0,0,0,0.8)';
 }
@@ -942,7 +893,6 @@ function showResult(won, attempts) {
     subtitle.textContent = 'MISSION ACCOMPLISHED — CITY SAVED';
     detail.textContent = `Correct code entered in ${attempts} attempt${attempts!==1?'s':''}. Binary Search intuition confirmed.`;
 
-    // Bomb win pulse
     document.getElementById('bombBody').className = 'bomb-body win';
   } else {
     icon.textContent = '💥';
@@ -960,25 +910,16 @@ function submitGuess() {
 
   const val = parseInt(currentInput);
 
-  if (!currentInput || isNaN(val) || val < 1 || val > 100) {
-    // Flash display red
+  if (!currentInput || isNaN(val) || val < 1 || val > 99) {
     const el = document.getElementById('guessDisplay');
     el.classList.add('invalid');
     setTimeout(() => el.classList.remove('invalid'), 500);
     return;
   }
 
-  // Check duplicate
-  if (guesses.includes(val)) {
-    currentInput = '';
-    updateDisplay();
-    return;
-  }
-
   guesses.push(val);
   const attemptNum = 8 - attemptsLeft;
 
-  // Turn off LED
   turnOffLED(attemptNum - 1);
   attemptsLeft--;
   updateAttemptsText();
@@ -1016,10 +957,9 @@ function submitGuess() {
   }
 }
 
-// Wire up numpad — attach directly to each button to avoid delegation issues
 document.querySelectorAll('.num-btn').forEach(btn => {
   btn.addEventListener('mousedown', e => {
-    e.preventDefault(); // prevent any focus/blur side effects
+    e.preventDefault();
   });
   btn.addEventListener('click', e => {
     if (btn.disabled || gameOver) return;
@@ -1031,7 +971,6 @@ document.querySelectorAll('.num-btn').forEach(btn => {
   });
 });
 
-// Keyboard still works as shortcut
 document.addEventListener('keydown', e => {
   if (gameOver) return;
   if (e.key === 'Enter') { submitGuess(); return; }
@@ -1039,7 +978,6 @@ document.addEventListener('keydown', e => {
   if (/^\d$/.test(e.key)) numpadPress(e.key);
 });
 
-// Init
 initGame();
 </script>
 </body>
