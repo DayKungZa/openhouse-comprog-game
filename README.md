@@ -42,26 +42,13 @@
 
 ## 📂 ไฟล์ที่มีในนี้
 
-### 🕹 เกม (`game/`)
-
-ไฟล์ HTML แต่ละด่าน เปิดได้ใน browser เลย ไม่ต้องติดตั้งอะไรเพิ่ม
-
 | ไฟล์ | ด่าน |
 |------|------|
 | `game1_robot.html` | หุ่นยนต์บุกโรงงาน |
 | `game2_wires.html` | กู้ระเบิดสายไฟ |
-| `game3-binary.html` | ระเบิดพิสดาร |
-
-### 📄 ไฟล์
-
-| ไฟล์ | คำอธิบาย |
-|------|----------|
-| `stage1-programmer.pdf` | Instruction ด่าน 1 สำหรับ Programmer |
-| `stage1-player.pdf` | Instruction ด่าน 1 สำหรับ Player |
-| `stage2-programmer.pdf` | Instruction ด่าน 2 สำหรับ Programmer |
-| `stage2-player.pdf` | Instruction ด่าน 2 สำหรับ Player |
-| `stage3-all.pdf` | Instruction ด่าน 3 (ทั้งทีม) |
-| `program-card.pdf` | ไฟล์สำหรับพิมพ์การ์ดกระดาษ |
+| `game3_binary.html` | ระเบิดพิสดาร |
+| `instruction.pdf` | Instruction รวม |
+| `program_card.pdf` | ไฟล์สำหรับพิมพ์การ์ดกระดาษ |
 
 ---
 
