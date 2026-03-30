@@ -42,14 +42,20 @@
 
 ## 📂 ไฟล์ที่มีในนี้
 
-| ไฟล์ | ด่าน |
+| ไฟล์ | คือ |
 |------|------|
-| `game1_robot.html` | หุ่นยนต์บุกโรงงาน |
-| `game2_wires.html` | กู้ระเบิดสายไฟ |
-| `game3_binary.html` | ระเบิดพิสดาร |
+| `game1_robot.html` | เกมด่าน 1 หุ่นยนต์บุกโรงงาน |
+| `game2_wires.html` | เกมด่าน 2 กู้ระเบิดสายไฟ |
+| `game3_binary.html` | เกมด่าน 3 ระเบิดพิสดาร |
 | `instruction.pdf` | Instruction รวม |
-| `program_card.pdf` | ไฟล์สำหรับพิมพ์การ์ดกระดาษ |
+| `program_card.pdf` | ไฟล์สำหรับพิมพ์การ์ดโปรแกรมกระดาษ |
 
+โดยในไฟล์ instruction จะแบ่งเป็น
+- ด่าน 1 for programmer (หน้า 1-2)
+- ด่าน 1 for player (หน้า 3)
+- ด่าน 2 for programmer (หน้า 4-5)
+- ด่าน 2 for player (หน้า 6)
+- ด่าน 3 for nong (หน้า 7)
 ---
 
 ## 🚀 วิธีใช้งานเกม
@@ -70,3 +76,6 @@ git clone https://github.com/daykungza/openhouse-comprog-game.git
 # เปิดเกมด่านที่ต้องการ
 open game/stage2-wires.html
 ````
+
+### Slides (เฉพาะ Com Prog)
+https://canva.link/cth3re874vrpld3
