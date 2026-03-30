@@ -48,9 +48,9 @@
 
 | ไฟล์ | ด่าน |
 |------|------|
-| `stage1-robot.html` | หุ่นยนต์บุกโรงงาน |
-| `stage2-wires.html` | กู้ระเบิดสายไฟ |
-| `stage3-binary.html` | ระเบิดพิสดาร |
+| `game1_robot.html` | หุ่นยนต์บุกโรงงาน |
+| `game2_wires.html` | กู้ระเบิดสายไฟ |
+| `game3-binary.html` | ระเบิดพิสดาร |
 
 ### 📄 ไฟล์
 
